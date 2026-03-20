@@ -1,0 +1,39 @@
+﻿<Application x:Class="GlavnayaKniga.WPF.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:GlavnayaKniga.WPF.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/GlobalStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <!-- Конвертеры -->
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+            <converters:ArchivedColorConverter x:Key="ArchivedColorConverter"/>
+            <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+            <converters:AmountToColorConverter x:Key="AmountToColorConverter"/>
+            <converters:AccountTypeNameConverter x:Key="AccountTypeNameConverter"/>
+            <converters:AccountTypeDescriptionConverter x:Key="AccountTypeDescriptionConverter"/>
+            <converters:DirectionToColorConverter x:Key="DirectionToColorConverter"/>
+            <converters:EntryStatusColorConverter x:Key="EntryStatusColorConverter"/>
+            <converters:EntryStatusConverter x:Key="EntryStatusConverter"/>
+            <converters:DateRangeFormatter x:Key="DateRangeFormatter"/>
+            <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+            <converters:BooleanToStyleConverter x:Key="BooleanToStyleConverter"/>
+            <converters:BooleanToTagConverter x:Key="BooleanToTagConverter"/>
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:DirectionTextConverter x:Key="DirectionTextConverter"/>
+            <converters:StatusToRussianConverter x:Key="StatusToRussianConverter"/>
+            <converters:StatusDisplayConverter x:Key="StatusDisplayConverter"/>
+            <converters:StatusMultiConverter x:Key="StatusMultiConverter"/>
+            <converters:StatusStyleConverter x:Key="StatusStyleConverter"/>
+            <converters:CanEditVisibilityConverter x:Key="CanEditVisibilityConverter"/>
+            <converters:CanTransferVisibilityConverter x:Key="CanTransferVisibilityConverter"/>
+            <converters:CanDismissVisibilityConverter x:Key="CanDismissVisibilityConverter"/>
+            <converters:EmployeeStatusToColorConverter x:Key="EmployeeStatusToColorConverter"/>
+            <converters:EmployeeStatusToTextConverter x:Key="EmployeeStatusToTextConverter"/>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,156 @@
+﻿<Window x:Class="GlavnayaKniga.WPF.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewModels="clr-namespace:GlavnayaKniga.WPF.ViewModels"
+        xmlns:views="clr-namespace:GlavnayaKniga.WPF.Views"
+        Title="Главная книга" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type viewModels:AccountsViewModel}">
+            <views:AccountsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:EntriesViewModel}">
+            <views:EntriesView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:ReportsViewModel}">
+            <views:ReportsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:BankAccountsViewModel}">
+            <views:BankAccountsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:BankStatementImportViewModel}">
+            <views:BankStatementImportView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:CounterpartiesViewModel}">
+            <views:CounterpartiesView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:NomenclatureViewModel}">
+            <views:NomenclatureView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:AssetTypeViewModel}">
+            <views:AssetTypesView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:AssetsViewModel}">
+            <views:AssetsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:StorageLocationsViewModel}">
+            <views:StorageLocationsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:ReceiptsViewModel}">
+            <views:ReceiptsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:IndividualsViewModel}">
+            <views:IndividualsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:PositionsViewModel}">
+            <views:PositionsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:EmployeesViewModel}">
+            <views:EmployeesView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:DepartmentsViewModel}">
+            <views:DepartmentsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:UnitsOfMeasureViewModel}">
+            <views:UnitsOfMeasureView/>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Меню -->
+        <Menu Grid.Row="0">
+
+            <MenuItem Header="Проводки" 
+                        Command="{Binding ShowEntriesCommand}"/>
+            
+            <MenuItem Header="Закупки" Style="{StaticResource TopLevelMenuItemStyle}">
+                <MenuItem Header="Поступления" 
+                          Command="{Binding ShowReceiptsCommand}"
+                          Style="{StaticResource SubMenuItemStyle}"/>               
+            </MenuItem>
+
+            <MenuItem Header="Кадры" Style="{StaticResource TopLevelMenuItemStyle}">
+                <MenuItem Header="Отделы" 
+              Command="{Binding ShowDepartmentsCommand}"
+              Style="{StaticResource SubMenuItemStyle}"/>
+                <MenuItem Header="Физические лица" 
+                              Command="{Binding ShowIndividualsCommand}"
+                              Style="{StaticResource SubMenuItemStyle}"/>
+                <MenuItem Header="Должности" 
+                              Command="{Binding ShowPositionsCommand}"
+                              Style="{StaticResource SubMenuItemStyle}"/>
+                <MenuItem Header="Сотрудники" 
+                              Command="{Binding ShowEmployeesCommand}"
+                              Style="{StaticResource SubMenuItemStyle}"/>
+            </MenuItem>
+
+            <MenuItem Header="Справочники">                
+                
+                <MenuItem Header="План счетов" 
+                          Command="{Binding ShowAccountsCommand}"
+                          Style="{StaticResource SubMenuItemStyle}"/>                
+                <MenuItem Header="Банковские счета" 
+                          Command="{Binding ShowBankAccountsCommand}"
+                          Style="{StaticResource SubMenuItemStyle}"/>
+                <MenuItem Header="Контрагенты" 
+                    Command="{Binding ShowCounterpartiesCommand}"
+                          Style="{StaticResource SubMenuItemStyle}"/>
+                <MenuItem Header="Номенклатура" 
+                    Command="{Binding ShowNomenclatureCommand}"
+                          Style="{StaticResource SubMenuItemStyle}"/>
+                <MenuItem Header="Объекты" Style="{StaticResource SubMenuItemStyle}">
+                    <MenuItem Header="Типы объектов" 
+                              Command="{Binding ShowAssetTypesCommand}"
+                              Style="{StaticResource SubMenuItemStyle}"/>
+                    <MenuItem Header="Объекты (ОС и оборудование)" 
+                              Command="{Binding ShowAssetsCommand}"
+                              Style="{StaticResource SubMenuItemStyle}"/>
+                </MenuItem>
+                <MenuItem Header="Места хранения" 
+                          Command="{Binding ShowStorageLocationsCommand}"
+                          Style="{StaticResource SubMenuItemStyle}"/>
+                <MenuItem Header="Единицы измерения" 
+                          Command="{Binding ShowUnitsOfMeasureCommand}"
+                          Style="{StaticResource SubMenuItemStyle}"/>
+
+                </MenuItem>
+
+            <MenuItem Header="Банк">
+                <MenuItem Header="Выписки банков" 
+                          Command="{Binding ShowBankStatementImportCommand}"
+                          Style="{StaticResource SubMenuItemStyle}"/>
+             </MenuItem>
+
+            <MenuItem Header="Отчеты" 
+                      Command="{Binding ShowReportsCommand}"/>
+
+            <Separator/>
+            <MenuItem Header="Выход" 
+          Style="{StaticResource SubMenuItemStyle}"/>
+        </Menu>
+
+        <!-- Контент -->
+        <ContentControl Grid.Row="1" 
+                        Content="{Binding CurrentViewModel}"
+                        Margin="10"/>
+
+        <!-- Статус бар -->
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusMessage}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <ProgressBar Width="100" Height="15" 
+                            IsIndeterminate="{Binding IsBusy}"
+                            Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

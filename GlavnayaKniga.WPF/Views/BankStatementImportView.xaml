@@ -1,0 +1,230 @@
+﻿<UserControl x:Class="GlavnayaKniga.WPF.Views.BankStatementImportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converters="clr-namespace:GlavnayaKniga.WPF.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1100">
+
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        <converters:StatusMultiConverter x:Key="StatusMultiConverter"/>
+
+        <Style x:Key="ToolBarButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="MinWidth" Value="140"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
+
+        <Style x:Key="StatusStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="3,2"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <TextBlock Grid.Row="0" 
+                   Text="Импорт банковских выписок" 
+                   Style="{StaticResource HeaderStyle}"
+                   Margin="10,5"/>
+
+        <!-- Панель инструментов -->
+        <WrapPanel Grid.Row="1" Margin="10,0,10,10">
+            <Button Content="📄 Импортировать выписку" 
+                    Style="{StaticResource ToolBarButtonStyle}"
+                    Command="{Binding ImportStatementCommand}"
+                    Background="#4CAF50"/>
+            <Button Content="📝 Создать проводки" 
+                    Style="{StaticResource ToolBarButtonStyle}"
+                    Command="{Binding CreateEntriesCommand}"
+                    Background="#2196F3"/>
+            <Button Content="👁️ Просмотр деталей" 
+                    Style="{StaticResource ToolBarButtonStyle}"
+                    Command="{Binding ViewStatementDetailsCommand}"
+                    Background="#FF9800"/>
+            <Button Content="🗑️ Удалить" 
+                    Style="{StaticResource ToolBarButtonStyle}"
+                    Background="#F44336"
+                    Command="{Binding DeleteStatementCommand}"/>
+            <Button Content="🔄 Обновить" 
+                    Style="{StaticResource ToolBarButtonStyle}"
+                    Background="#607D8B"
+                    Command="{Binding RefreshCommand}"/>
+            <Button Content="🏦 Банковские счета" 
+                    Style="{StaticResource ToolBarButtonStyle}"
+                    Background="#9C27B0"
+                    Command="{Binding ManageBankAccountsCommand}"/>
+        </WrapPanel>
+
+        <!-- Панель фильтров -->
+        <Border Grid.Row="2" 
+                Background="#F5F5F5" 
+                Padding="10" 
+                Margin="10,0,10,10"
+                CornerRadius="4"
+                BorderBrush="#E0E0E0"
+                BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Период -->
+                <TextBlock Grid.Column="0" Text="Период:" VerticalAlignment="Center" Margin="5,0,10,0"/>
+                <DatePicker Grid.Column="1" 
+                            SelectedDate="{Binding StartDate}"
+                            Width="120"
+                            Margin="0,0,5,0"/>
+                <TextBlock Grid.Column="2" Text="—" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <DatePicker Grid.Column="3" 
+                            SelectedDate="{Binding EndDate}"
+                            Width="120"
+                            Margin="0,0,20,0"/>
+
+                <!-- Фильтр по счету -->
+                <TextBlock Grid.Column="4" Text="Счет:" VerticalAlignment="Center" Margin="5,0,10,0"/>
+                <ComboBox Grid.Column="5" 
+                          ItemsSource="{Binding BankAccounts}"
+                          DisplayMemberPath="DisplayName"
+                          SelectedItem="{Binding SelectedBankAccount}"
+                          Width="200"
+                          Margin="0,0,20,0"/>
+
+                <!-- Фильтр по статусу -->
+                <CheckBox Grid.Column="6" 
+                          Content="Только новые" 
+                          IsChecked="{Binding ShowOnlyNew}"
+                          VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Таблица выписок -->
+        <DataGrid Grid.Row="3" 
+                  ItemsSource="{Binding Statements}"
+                  SelectedItem="{Binding SelectedStatement}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  Margin="10"
+                  AlternatingRowBackground="#F9F9F9"
+                  GridLinesVisibility="Horizontal"
+                  RowDetailsVisibilityMode="VisibleWhenSelected">
+
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Статус" Width="180">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="3"
+        Background="{Binding Status, Converter={StaticResource StatusToColorConverter}}"
+        Padding="5,2">
+                                <TextBlock Text="{Binding Status, Converter={StaticResource StatusToRussianConverter}}" 
+               Foreground="White"
+               HorizontalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="Дата импорта" 
+                                    Binding="{Binding ImportedAt, StringFormat=dd.MM.yyyy HH:mm}" 
+                                    Width="85"/>
+                
+                <DataGridTextColumn Header="Счет" 
+                    Binding="{Binding AccountNumber}" 
+                    Width="170"/>
+
+                <DataGridTextColumn Header="Поступило" 
+                    Binding="{Binding TotalIncoming, StringFormat=N2}" 
+                    Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Foreground" Value="Green"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Списано" 
+                    Binding="{Binding TotalOutgoing, StringFormat=N2}" 
+                    Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Foreground" Value="Red"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Период" 
+                                    Binding="{Binding StartDate, StringFormat=dd.MM.yyyy}" 
+                                    Width="100"/>                
+
+                <DataGridTextColumn Header="Документов" 
+                                    Binding="{Binding DocumentsCount}" 
+                                    Width="90"/>
+
+                
+
+                <DataGridTextColumn Header="Файл" 
+                     Binding="{Binding FileName}" 
+                     Width="300"/>
+
+            </DataGrid.Columns>
+
+            <!-- Детали строки -->
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <Border Background="#FFF9E6" Padding="10" BorderBrush="#FFE0B2" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Банковский счет:" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding BankAccountDisplay}" Margin="0,0,0,5"/>
+
+                            <TextBlock Text="Импортировал:" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding ImportedBy}" Margin="0,0,0,5"/>
+
+                            <TextBlock Text="Остатки:" FontWeight="Bold"/>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="100"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Начальный:" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Column="1" Text="{Binding OpeningBalance, StringFormat=N2}"/>
+                                <TextBlock Grid.Column="2" Text="Конечный:" Margin="20,0,10,0"/>
+                                <TextBlock Grid.Column="3" Text="{Binding ClosingBalance, StringFormat=N2}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+        </DataGrid>
+
+        <!-- Индикатор загрузки -->
+        <Border Grid.RowSpan="4"
+                Background="#80FFFFFF"
+                Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="20" Margin="0,0,0,10"/>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="14" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

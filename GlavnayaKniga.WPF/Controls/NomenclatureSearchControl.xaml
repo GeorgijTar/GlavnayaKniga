@@ -1,0 +1,154 @@
+﻿<UserControl x:Class="GlavnayaKniga.WPF.Controls.NomenclatureSearchControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converters="clr-namespace:GlavnayaKniga.WPF.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="35" d:DesignWidth="500"
+             x:Name="NomenclatureSearch">
+
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1,1,0,1"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="25"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Margin" Value="2,0,0,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="2"
+                                Height="25"
+                                Width="25">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SearchListBoxStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2196F3"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="MaxHeight" Value="300"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        </Style>
+
+        <DataTemplate x:Key="NomenclatureItemTemplate">
+            <Border Padding="1" BorderBrush="#F0F0F0" BorderThickness="0,0,0,1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>                    
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <TextBlock Text="Тип:" Foreground="Gray" FontSize="11" Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding TypeDisplay}" Foreground="Gray" FontSize="11" Margin="0,0,10,0"/>
+                            <TextBlock Text="Ед.:" Foreground="Gray" FontSize="11" Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding UnitDisplay}" Foreground="Gray" FontSize="11"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Панель с полем поиска и кнопками -->
+        <Grid Grid.Row="0" Height="25" Margin="2,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Поле поиска -->
+            <TextBox x:Name="SearchTextBox" 
+                     Grid.Column="0"
+                     Style="{StaticResource SearchTextBoxStyle}"
+                     TextChanged="SearchTextBox_TextChanged"
+                     KeyDown="SearchTextBox_KeyDown"
+                     LostFocus="SearchTextBox_LostFocus"
+                     IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Down" Command="{Binding ShowDropdownCommand, ElementName=NomenclatureSearch}"/>
+                    <KeyBinding Key="Enter" Command="{Binding SelectCurrentCommand, ElementName=NomenclatureSearch}"/>
+                    <KeyBinding Key="Escape" Command="{Binding HideDropdownCommand, ElementName=NomenclatureSearch}"/>
+                </TextBox.InputBindings>
+            </TextBox>
+
+            <!-- Кнопка добавления -->
+            <Button Grid.Column="1"
+                    Content="➕"
+                    Style="{StaticResource ActionButtonStyle}"
+                    Background="#4CAF50"
+                    Foreground="White"
+                    ToolTip="Добавить новую номенклатуру"
+                    Command="{Binding AddCommand, ElementName=NomenclatureSearch}"/>
+
+            <!-- Кнопка редактирования -->
+            <Button Grid.Column="2"
+                    Content="✏️"
+                    Style="{StaticResource ActionButtonStyle}"
+                    Background="#2196F3"
+                    Foreground="White"
+                    ToolTip="Редактировать выбранную номенклатуру"
+                    Command="{Binding EditCommand, ElementName=NomenclatureSearch}"
+                    CommandParameter="{Binding SelectedItem, ElementName=NomenclatureSearch}"/>
+        </Grid>
+
+        <!-- Выпадающий список результатов -->
+        <Popup x:Name="ResultsPopup" 
+               Grid.Row="1"
+               PlacementTarget="{Binding ElementName=SearchTextBox}"
+               Placement="Bottom"
+               StaysOpen="False"
+               AllowsTransparency="True"
+               PopupAnimation="Slide"
+               Width="{Binding ActualWidth, ElementName=SearchTextBox}"
+               IsOpen="{Binding IsPopupOpen, ElementName=NomenclatureSearch}"
+               VerticalOffset="2"
+               MaxHeight="300">
+
+            <Border BorderBrush="#2196F3" 
+                    BorderThickness="2" 
+                    Background="White"
+                    CornerRadius="0,0,4,4">
+
+                <ListBox x:Name="ResultsListBox"
+                         ItemsSource="{Binding SearchResults, ElementName=NomenclatureSearch}"
+                         SelectedItem="{Binding SelectedItem, ElementName=NomenclatureSearch}"
+                         Style="{StaticResource SearchListBoxStyle}"
+                         ItemTemplate="{StaticResource NomenclatureItemTemplate}"
+                         SelectionChanged="ResultsListBox_SelectionChanged"
+                         MouseDoubleClick="ResultsListBox_MouseDoubleClick"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

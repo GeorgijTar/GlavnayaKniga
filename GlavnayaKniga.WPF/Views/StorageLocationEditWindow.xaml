@@ -1,0 +1,180 @@
+﻿<Window x:Class="GlavnayaKniga.WPF.Views.StorageLocationEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:GlavnayaKniga.WPF.Converters"
+        xmlns:controls="clr-namespace:GlavnayaKniga.WPF.Controls"
+        Title="{Binding Title}" Height="650" Width="550"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        FontSize="14">
+
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <Style x:Key="EmployeeSearchStyle" TargetType="controls:EmployeeSearchControl">
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Height" Value="30"/>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                  HorizontalScrollBarVisibility="Disabled"
+                  PanningMode="VerticalOnly">
+
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Основная информация -->
+            <TextBlock Grid.Row="0" Text="Основная информация" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+
+            <!-- Код -->
+            <TextBlock Grid.Row="1" Text="Код:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <TextBox Grid.Row="2" 
+                     Text="{Binding Location.Code, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,10"
+                     MaxLength="50"
+                     Height="30"/>
+
+            <!-- Наименование -->
+            <TextBlock Grid.Row="3" Text="Наименование:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <TextBox Grid.Row="4" 
+                     Text="{Binding Location.Name, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,10"
+                     MaxLength="200"
+                     Height="30"/>
+
+            <!-- Тип -->
+            <TextBlock Grid.Row="5" Text="Тип:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <ComboBox Grid.Row="6" 
+                      ItemsSource="{Binding LocationTypes}"
+                      SelectedItem="{Binding SelectedType}"
+                      Margin="0,0,0,10"
+                      Height="30"/>
+
+            <!-- Родительское место -->
+            <TextBlock Grid.Row="7" Text="Родительское место:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <ComboBox Grid.Row="8" 
+                      ItemsSource="{Binding ParentLocations}"
+                      DisplayMemberPath="DisplayName"
+                      SelectedItem="{Binding SelectedParentLocation}"
+                      Margin="0,0,0,10"
+                      Height="30"/>
+
+            <!-- Адрес -->
+            <TextBlock Grid.Row="9" Text="Адрес:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <TextBox Grid.Row="10" 
+                     Text="{Binding Location.Address, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,10"
+                     MaxLength="500"
+                     Height="30"/>
+
+            <!-- Описание -->
+            <TextBlock Grid.Row="11" Text="Описание:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <TextBox Grid.Row="12" 
+                     Text="{Binding Location.Description, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,10"
+                     MaxLength="500"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     MinHeight="40"/>
+
+            <!-- Характеристики -->
+            <TextBlock Grid.Row="13" Text="Характеристики" FontWeight="Bold" FontSize="16" Margin="0,10,0,10"/>
+
+            <Grid Grid.Row="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                    <TextBlock Text="Площадь (м²):" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding Location.Area, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10"
+                             MaxLength="15"
+                             Height="30"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                    <TextBlock Text="Вместимость (м³):" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding Location.Capacity, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10"
+                             MaxLength="15"
+                             Height="30"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Температурный режим -->
+            <TextBlock Grid.Row="15" Text="Температурный режим:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <TextBox Grid.Row="16" 
+                     Text="{Binding Location.TemperatureRegime, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,10"
+                     MaxLength="100"
+                     Height="30"/>
+
+            <!-- Ответственное лицо (сотрудник) - используем кастомный контрол -->
+            <TextBlock Grid.Row="17" Text="Ответственный сотрудник:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <controls:EmployeeSearchControl 
+                Grid.Row="18"
+                x:Name="EmployeeSearch"
+                ItemsSource="{Binding ResponsibleEmployees}"
+                SelectedItem="{Binding SelectedResponsibleEmployee, UpdateSourceTrigger=PropertyChanged}"
+                ItemSelected="EmployeeSearch_ItemSelected"
+                AddCommand="{Binding AddEmployeeCommand}"
+                EditCommand="{Binding EditEmployeeCommand}"
+                Style="{StaticResource EmployeeSearchStyle}"/>
+
+            <!-- Кнопки -->
+            <StackPanel Grid.Row="19" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                <Button Content="Сохранить" 
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding SaveCommand}"
+                        IsDefault="True"
+                        Margin="5"
+                        MinWidth="90"
+                        Height="35"/>
+                <Button Content="Отмена" 
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding CancelCommand}"
+                        IsCancel="True"
+                        Margin="5"
+                        MinWidth="90"
+                        Height="35"/>
+            </StackPanel>
+
+            <!-- Индикатор загрузки -->
+            <Border Grid.RowSpan="20"
+                    Background="#80FFFFFF"
+                    Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    CornerRadius="6">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="20" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="14" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Window>

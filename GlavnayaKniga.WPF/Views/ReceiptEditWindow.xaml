@@ -1,0 +1,689 @@
+﻿<Window x:Class="GlavnayaKniga.WPF.Views.ReceiptEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:GlavnayaKniga.WPF.Converters"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        xmlns:controls="clr-namespace:GlavnayaKniga.WPF.Controls"
+        Title="{Binding Title}" Height="850" Width="1500"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="SingleBorderWindow"
+        ShowInTaskbar="False"
+        FontSize="14">
+
+    <Window.Resources>
+        <!-- Конвертеры -->
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        <converters:EmptyIdToBackgroundConverter x:Key="EmptyIdToBackgroundConverter"/>
+        <converters:EmptyIdToForegroundConverter x:Key="EmptyIdToForegroundConverter"/>
+        <converters:EmptyIdToFontWeightConverter x:Key="EmptyIdToFontWeightConverter"/>
+
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,15,0,10"/>
+        </Style>
+
+        <!-- Обновленный стиль DataGrid -->
+        <Style x:Key="EditableDataGridStyle" TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="IsReadOnly" Value="False"/>
+            <Setter Property="Margin" Value="0,5,0,10"/>
+            <Setter Property="MaxHeight" Value="400"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="AlternatingRowBackground" Value="#F9F9F9"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+            <Setter Property="RowHeight" Value="40"/>
+            <!-- Увеличена высота строки -->
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <!-- Стиль для заголовков колонок -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#E3F2FD"/>
+            <Setter Property="Foreground" Value="#1976D2"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="BorderBrush" Value="#BBDEFB"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+
+        <!-- Стиль для строк -->
+        <Style TargetType="DataGridRow">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#BBDEFB"/>
+                    <Setter Property="BorderBrush" Value="#1976D2"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Trigger>
+                <Trigger Property="AlternationIndex" Value="1">
+                    <Setter Property="Background" Value="#F5F5F5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для ячеек -->
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Height="40">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#BBDEFB"/>
+                    <Setter Property="Foreground" Value="#1976D2"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Trigger>
+                <Trigger Property="IsReadOnly" Value="True">
+                    <Setter Property="Background" Value="#FAFAFA"/>
+                    <Setter Property="Foreground" Value="#757575"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NumericColumnStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+
+        <!-- Стиль для текстовых полей в режиме редактирования -->
+        <Style x:Key="EditingTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="BorderBrush" Value="#2196F3"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Background" Value="#E3F2FD"/>
+            <Setter Property="Foreground" Value="#000000"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- Стиль для комбобоксов в режиме редактирования -->
+        <Style x:Key="EditingComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Padding" Value="3"/>
+            <Setter Property="BorderBrush" Value="#2196F3"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Background" Value="#E3F2FD"/>
+            <Setter Property="Foreground" Value="#000000"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="25"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ToolBarButtonStyle" TargetType="Button">
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ComboBoxColumnStyle" TargetType="ComboBox" BasedOn="{StaticResource EditingComboBoxStyle}"/>
+
+        <!-- Стиль для контрола поиска номенклатуры -->
+        <Style x:Key="NomenclatureSearchStyle" TargetType="controls:NomenclatureSearchControl">
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="MinHeight" Value="30"/>
+        </Style>
+
+        <!-- Стиль для контрола поиска контрагента -->
+        <Style x:Key="CounterpartySearchStyle" TargetType="controls:CounterpartySearchControl">
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="MinHeight" Value="30"/>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                  HorizontalScrollBarVisibility="Auto"
+                  PanningMode="Both">
+
+        <Grid Margin="20" MinWidth="1200">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Шапка документа -->
+            <TextBlock Grid.Row="0" Text="Документ поступления" FontWeight="Bold" FontSize="18" Margin="0,0,0,15"/>
+
+            <!-- Основная информация -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Номер:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" 
+                         Text="{Binding Receipt.Number, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,20,5"
+                         MaxLength="50"
+                         Height="30"/>
+
+                <TextBlock Grid.Column="2" Text="Дата:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                <DatePicker Grid.Column="3" 
+                            SelectedDate="{Binding Receipt.Date}"
+                            Margin="0,0,0,5"
+                            Height="30"
+                            DisplayDateEnd="{x:Static system:DateTime.Today}" HorizontalAlignment="Left"/>
+            </Grid>
+
+            <!-- Дата принятия к учету -->
+            <Grid Grid.Row="2" Margin="0,5,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Дата учета:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                <DatePicker Grid.Column="1" 
+                            SelectedDate="{Binding Receipt.AccountingDate}"
+                            Margin="0,0,20,5"
+                            Height="30"
+                            DisplayDateEnd="{x:Static system:DateTime.Today}" HorizontalAlignment="Left"/>
+
+                <TextBlock Grid.Column="2" Text="Статус:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                <Border Grid.Column="3" 
+                        Background="{Binding Receipt.Status, Converter={StaticResource StatusToColorConverter}}"
+                        CornerRadius="3"
+                        Padding="5,2"
+                        Margin="0,5,0,5"
+                        Height="25"
+                        HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding Receipt.StatusDisplay}" 
+                               Foreground="White"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+
+            <!-- Контрагент и счет учета -->
+            <Grid Grid.Row="3" Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Контрагент:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+
+                <!-- Кастомный контрол с кнопками -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                    <controls:CounterpartySearchControl 
+            x:Name="ContractorSearch"
+            ItemsSource="{Binding Contractors, UpdateSourceTrigger=PropertyChanged}"
+            SelectedItem="{Binding SelectedContractor, UpdateSourceTrigger=PropertyChanged}"
+            ItemSelected="ContractorSearch_ItemSelected"
+            AddCommand="{Binding AddContractorCommand}"
+            EditCommand="{Binding EditContractorCommand}"
+            Height="30"
+            Width="650"/>
+                </StackPanel>
+                
+                <!-- Счет учета -->
+                <TextBlock Grid.Column="2" Text="Счет учета:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="3" 
+              ItemsSource="{Binding CreditAccounts}"
+              DisplayMemberPath="DisplayName"
+              SelectedItem="{Binding SelectedCreditAccount}"
+              Margin="0,0,0,5"
+              Height="30"
+              VerticalAlignment="Center"/>
+            </Grid>
+
+            <!-- Договор и дата договора -->
+            <Grid Grid.Row="4" Margin="0,5,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Договор:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" 
+                         Text="{Binding Receipt.ContractNumber, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,20,5"
+                         MaxLength="50"
+                         Height="30"/>
+
+                <TextBlock Grid.Column="2" Text="Дата договора:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                <DatePicker Grid.Column="3" 
+                            SelectedDate="{Binding Receipt.ContractDate}"
+                            Margin="0,0,0,5"
+                            Height="30"/>
+            </Grid>
+
+            <!-- Способ начисления НДС и Основание -->
+            <Grid Grid.Row="5" Margin="0,5,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Способ НДС:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" 
+                          ItemsSource="{Binding VatCalculationMethods}"
+                          SelectedItem="{Binding SelectedVatCalculationMethod}"
+                          Margin="0,0,20,5"
+                          Height="30"/>
+
+                <TextBlock Grid.Column="2" Text="Основание:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="3" 
+                         Text="{Binding Receipt.Basis, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,5"
+                         MaxLength="200"
+                         Height="30"/>
+            </Grid>
+
+            <!-- УПД и счет-фактура -->
+            <Grid Grid.Row="6" Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <CheckBox Grid.Column="0" 
+                          Content="Универсальный передаточный документ (УПД)" 
+                          IsChecked="{Binding IsUPD}"
+                          Margin="0,0,20,5"
+                          VerticalAlignment="Center"
+                          FontWeight="SemiBold"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" 
+                            Visibility="{Binding ShowInvoiceFields, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                    <TextBlock Text="Счет-фактура №:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding Receipt.InvoiceNumber, UpdateSourceTrigger=PropertyChanged}"
+                             Width="150"
+                             Margin="0,0,10,5"
+                             Height="30"/>
+
+                    <TextBlock Text="от:" FontWeight="SemiBold" Margin="0,0,10,5" VerticalAlignment="Center"/>
+                    <DatePicker SelectedDate="{Binding Receipt.InvoiceDate}"
+                                Width="120"
+                                Margin="0,0,0,5"
+                                Height="30"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Таблица строк документа -->
+            <TextBlock Grid.Row="7" Text="Строки документа" Style="{StaticResource SectionHeaderStyle}"/>
+
+            <!-- Панель инструментов для строк -->
+            <StackPanel Grid.Row="8" Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="➕ Добавить строку" 
+                        Style="{StaticResource ToolBarButtonStyle}"
+                        Background="#4CAF50"
+                        Command="{Binding AddItemCommand}"/>
+                <Button Content="✖️ Удалить строку" 
+                        Style="{StaticResource ToolBarButtonStyle}"
+                        Background="#F44336"
+                        Command="{Binding DeleteItemCommand}"
+                        Margin="5,2,2,2"/>
+            </StackPanel>
+
+            <!-- DataGrid с возможностью редактирования -->
+            <DataGrid Grid.Row="9" 
+                      ItemsSource="{Binding Items}"
+                      SelectedItem="{Binding SelectedItem}"
+                      Style="{StaticResource EditableDataGridStyle}"
+                      RowEditEnding="DataGrid_RowEditEnding"
+                      CurrentCellChanged="DataGrid_CurrentCellChanged"
+                      AutoGenerateColumns="False" Padding="4">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="№" 
+                                        Binding="{Binding LineNumber}" 
+                                        Width="40"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Номенклатура - TemplateColumn с контролом поиска -->
+                    <DataGridTemplateColumn Header="Номенклатура" Width="320">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding NomenclatureId, Converter={StaticResource EmptyIdToBackgroundConverter}}"
+                    Padding="8"
+                    CornerRadius="3"
+                    Height="38">
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding NomenclatureName}" 
+                               FontWeight="SemiBold"
+                               Foreground="{Binding NomenclatureId, Converter={StaticResource EmptyIdToForegroundConverter}}"/>
+                                       
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <Border Padding="2" Height="38">
+                                    <controls:NomenclatureSearchControl 
+                    ItemsSource="{Binding DataContext.Nomenclatures, RelativeSource={RelativeSource AncestorType=Window}}"
+                    SelectedItem="{Binding DataContext.EditingNomenclature, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"
+                    AddCommand="{Binding DataContext.AddNomenclatureCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                    EditCommand="{Binding DataContext.EditNomenclatureCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                    ItemSelected="NomenclatureSearch_ItemSelected"
+                    Loaded="NomenclatureSearch_Loaded"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+
+                    <DataGridTextColumn Header="Ед. изм." Width="55" Binding="{Binding NomenclatureUnit}" IsReadOnly="True" />
+
+                    <!-- Кол-во - TemplateColumn с TextBox -->
+                    <DataGridTemplateColumn Header="Кол-во" Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Quantity, StringFormat=N3}" 
+                                           Style="{StaticResource NumericColumnStyle}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Quantity, UpdateSourceTrigger=LostFocus, Mode=TwoWay, StringFormat=N3}"
+                                         Style="{StaticResource EditingTextBoxStyle}"
+                                         HorizontalAlignment="Right"
+                                         LostFocus="TextBox_LostFocus"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Цена - TemplateColumn с TextBox -->
+                    <DataGridTemplateColumn Header="Цена" Width="90">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Price, StringFormat=N2}" 
+                                           Style="{StaticResource NumericColumnStyle}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Price, UpdateSourceTrigger=LostFocus, Mode=TwoWay, StringFormat=N2}"
+                                         Style="{StaticResource EditingTextBoxStyle}"
+                                         HorizontalAlignment="Right"
+                                         LostFocus="TextBox_LostFocus"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Сумма без НДС -->
+                    <DataGridTextColumn Header="Сумма без НДС" 
+                                        Binding="{Binding Amount, StringFormat=N2}" 
+                                        Width="110">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource NumericColumnStyle}"/>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- НДС - TemplateColumn с ComboBox -->
+                    <DataGridTemplateColumn Header="НДС,%" Width="60">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding VatRate, StringFormat=N0}" 
+                                           Style="{StaticResource NumericColumnStyle}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.VatRates, RelativeSource={RelativeSource AncestorType=Window}}"
+                                          SelectedItem="{Binding VatRate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                          Style="{StaticResource EditingComboBoxStyle}"
+                                          SelectionChanged="ComboBox_SelectionChanged"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Сумма НДС" 
+                                        Binding="{Binding VatAmount, StringFormat=N2}" 
+                                        Width="100">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource NumericColumnStyle}"/>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Сумма с НДС" 
+                                        Binding="{Binding AmountWithVat, StringFormat=N2}" 
+                                        Width="110">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource NumericColumnStyle}"/>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Счет учета - TemplateColumn с ComboBox -->
+                    <DataGridTemplateColumn Header="Счет учета" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DebitAccountCode}" 
+                                           VerticalAlignment="Center"
+                                           Margin="5,0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.DebitAccounts, RelativeSource={RelativeSource AncestorType=Window}}"
+                                          DisplayMemberPath="DisplayName"
+                                          SelectedItem="{Binding DataContext.EditingDebitAccount, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{StaticResource EditingComboBoxStyle}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Счет НДС - TemplateColumn с ComboBox -->
+                    <DataGridTemplateColumn Header="Счет НДС" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding VatAccountCode}" 
+                                           VerticalAlignment="Center"
+                                           Margin="5,0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.VatAccounts, RelativeSource={RelativeSource AncestorType=Window}}"
+                                          DisplayMemberPath="DisplayName"
+                                          SelectedItem="{Binding DataContext.EditingVatAccount, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{StaticResource EditingComboBoxStyle}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Место хранения - TemplateColumn с ComboBox -->
+                    <DataGridTemplateColumn Header="Место хранения" Width="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding StorageLocationName}" 
+                                           VerticalAlignment="Center"
+                                           Margin="5,0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.StorageLocations, RelativeSource={RelativeSource AncestorType=Window}}"
+                                          DisplayMemberPath="FullPath"
+                                          SelectedItem="{Binding DataContext.EditingStorageLocation, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{StaticResource EditingComboBoxStyle}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Примечание" 
+                                        Binding="{Binding Note}" 
+                                        Width="100"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Итоги -->
+            <Grid Grid.Row="10" Margin="0,10,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="1" Text="Итого:" FontWeight="Bold" FontSize="16" Margin="0,0,20,0" VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Сумма без НДС:" FontWeight="SemiBold" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalAmount, StringFormat=N2}" 
+                               FontSize="16" 
+                               FontWeight="Bold"
+                               Foreground="#2196F3"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="НДС:" FontWeight="SemiBold" Margin="20,0,10,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalVatAmount, StringFormat=N2}" 
+                               FontSize="16" 
+                               FontWeight="Bold"
+                               Foreground="#FF9800"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Всего:" FontWeight="SemiBold" Margin="20,0,10,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalAmountWithVat, StringFormat=N2}" 
+                               FontSize="16" 
+                               FontWeight="Bold"
+                               Foreground="#4CAF50"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Кнопки -->
+            <StackPanel Grid.Row="11" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                <Button Content="Сохранить" 
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding SaveCommand}"
+                        IsDefault="True"
+                        Margin="5"
+                        MinWidth="100"
+                        Height="35"
+                        Background="#4CAF50"/>
+                <Button Content="Отмена" 
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding CancelCommand}"
+                        IsCancel="True"
+                        Margin="5"
+                        MinWidth="100"
+                        Height="35"/>
+            </StackPanel>
+
+            <!-- Индикатор загрузки -->
+            <Border Grid.RowSpan="12"
+                    Background="#80FFFFFF"
+                    Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    CornerRadius="6">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="20" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="14" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Window>

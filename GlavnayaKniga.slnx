@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="GlavnayaKniga.Application/GlavnayaKniga.Application.csproj" />
+  <Project Path="GlavnayaKniga.Domain/GlavnayaKniga.Domain.csproj" />
+  <Project Path="GlavnayaKniga.Infrastructure/GlavnayaKniga.Infrastructure.csproj" />
+  <Project Path="GlavnayaKniga.WPF/GlavnayaKniga.WPF.csproj" />
+</Solution>

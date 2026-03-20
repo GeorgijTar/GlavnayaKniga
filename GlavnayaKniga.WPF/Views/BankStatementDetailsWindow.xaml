@@ -1,0 +1,180 @@
+﻿<Window x:Class="GlavnayaKniga.WPF.Views.BankStatementDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:GlavnayaKniga.WPF.Converters"
+        Title="Детали банковской выписки" Height="600" Width="1200"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="SingleBorderWindow">
+
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:DirectionToColorConverter x:Key="DirectionToColorConverter"/>
+        <converters:EntryStatusConverter x:Key="EntryStatusConverter"/>
+        <converters:EntryStatusColorConverter x:Key="EntryStatusColorConverter"/>
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        <converters:DateRangeFormatter x:Key="DateRangeFormatter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+
+        <Style x:Key="DirectionStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="3"/>
+        </Style>
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                            CornerRadius="3"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок с информацией о выписке -->
+        <Border Grid.Row="0" Background="#F5F5F5" Padding="10" CornerRadius="4" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Text="Файл:" FontWeight="Bold"/>
+                    <TextBlock Text="Период:" FontWeight="Bold" Margin="0,5,0,0"/>
+                    <TextBlock Text="Счет:" FontWeight="Bold" Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Text="{Binding Statement.FileName}"/>
+                    <!--<TextBlock Text="{Binding Statement.StartDate, StringFormat='dd.MM.yyyy - {0}', Converter={x:Static converters:DateRangeFormatter.Instance}}" Margin="0,5,0,0"/>-->
+                    <TextBlock Text="{Binding Statement.AccountNumber}" Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Border CornerRadius="3"  Padding="10,5">
+                        <TextBlock Text="{Binding Statement.Status}" Foreground="White" FontWeight="Bold"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Таблица документов -->
+        <TextBlock Grid.Row="1" Text="Документы выписки:" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+
+        <DataGrid Grid.Row="2" 
+                  ItemsSource="{Binding Documents}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  AlternatingRowBackground="#F9F9F9"
+                  GridLinesVisibility="Horizontal">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Дата" 
+                                    Binding="{Binding Date, StringFormat=dd.MM.yyyy}" 
+                                    Width="80" />
+
+                <DataGridTextColumn Header="Тип" 
+                                    Binding="{Binding DocumentType}" 
+                                    Width="120"/>
+
+                <DataGridTextColumn Header="Номер" 
+                                    Binding="{Binding Number}" 
+                                    Width="80"/>
+
+                <DataGridTemplateColumn Header="Направление" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="3"
+                                    
+                                    Padding="5,2">
+                                <TextBlock Text="{Binding Direction}" 
+                                           
+                                           HorizontalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="Плательщик" 
+                                    Binding="{Binding PayerName}" 
+                                    Width="150"/>
+
+                <DataGridTextColumn Header="Получатель" 
+                                    Binding="{Binding RecipientName}" 
+                                    Width="150"/>
+
+                <DataGridTextColumn Header="Сумма" 
+                                    Binding="{Binding DisplayAmount}" 
+                                    Width="100">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Назначение" 
+                                    Binding="{Binding PaymentPurpose}" 
+                                    Width="*"/>
+
+                <DataGridTemplateColumn Header="Действия" Width="180">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <!-- Кнопка создания проводки -->
+                                <Button Content="{Binding EntryId, Converter={StaticResource EntryStatusConverter}}"
+                        Command="{Binding DataContext.CreateEntryForDocumentCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        CommandParameter="{Binding}"
+                        Background="{Binding EntryId, Converter={StaticResource EntryStatusColorConverter}}"
+                        Foreground="White"
+                        Style="{StaticResource ActionButtonStyle}"
+                        ToolTip="Создать проводку по документу"
+                        Width="80"/>
+
+                                <!-- Кнопка просмотра проводки (видна только если проводка создана) -->
+                                <Button Content="👁️"
+                        Command="{Binding DataContext.ViewEntryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        CommandParameter="{Binding}"
+                        Background="#2196F3"
+                        Foreground="White"
+                        Style="{StaticResource ActionButtonStyle}"
+                        ToolTip="Просмотреть проводку"
+                        Width="30"
+                        Visibility="{Binding EntryId, Converter={StaticResource NullToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Индикатор загрузки -->
+        <Border Grid.RowSpan="3"
+                Background="#80FFFFFF"
+                Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="20" Margin="0,0,0,10"/>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="14" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
